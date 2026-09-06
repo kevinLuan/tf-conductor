@@ -241,7 +241,7 @@ public class DeciderService {
                 pendingTask.setExecuted(true);
                 List<TaskModel> nextTasks = getNextTask(workflow, pendingTask);
                 if (pendingTask.isLoopOverTask()
-                        && !TaskType.DO_WHILE.name().equals(pendingTask.getTaskType())
+                        && !TaskType.isLoopTask(pendingTask.getTaskType())
                         && !nextTasks.isEmpty()) {
                     nextTasks = filterNextLoopOverTasks(nextTasks, pendingTask, workflow);
                 }
@@ -528,8 +528,8 @@ public class DeciderService {
         while (isTaskSkipped(taskToSchedule, workflow)) {
             taskToSchedule = workflowDef.getNextTask(taskToSchedule.getTaskReferenceName());
         }
-        if (taskToSchedule != null && TaskType.DO_WHILE.name().equals(taskToSchedule.getType())) {
-            // check if already has this DO_WHILE task, ignore it if it already exists
+        if (taskToSchedule != null && TaskType.isLoopTask(taskToSchedule.getType())) {
+            // 循环头已在运行则不再重复调度
             String nextTaskReferenceName = taskToSchedule.getTaskReferenceName();
             if (workflow.getTasks().stream()
                     .anyMatch(

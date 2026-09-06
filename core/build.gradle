@@ -14,7 +14,9 @@ apply plugin: 'groovy'
 
 dependencies {
     implementation project(':conductor-common')
-
+    // Taskflow 的 AI / if-else 评估器在 conductor-taskflow 模块中。
+    // 该模块需实现本模块的 Evaluator，故只能由 taskflow 依赖 core；
+    // 此处不能再反向依赖（Gradle 循环依赖）。通义千问 SDK 也一并放到 taskflow。
     compileOnly 'org.springframework.boot:spring-boot-starter'
     compileOnly 'org.springframework.boot:spring-boot-starter-validation'
     compileOnly 'org.springframework.retry:spring-retry'

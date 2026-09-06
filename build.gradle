@@ -218,7 +218,29 @@ task server {
     dependsOn ':conductor-server:bootRun'
 }
 
-configure(allprojects - project(':conductor-grpc')) {
+configure(allprojects - project(':conductor-grpc') - project(':conductor-taskflow')) {
+    apply plugin: 'com.diffplug.spotless'
+
+    spotless {
+        java {
+            target 'src/**/*.java'
+            googleJavaFormat().aosp()
+            removeUnusedImports()
+            importOrder('java', 'javax', 'org', 'com.netflix', '', '\\#com.netflix', '\\#')
+        }
+        format 'licenseConductorJava', {
+            target 'src/**/*.java'
+            targetExclude 'src/**/cn/taskflow/conductor/**/*.java'
+            licenseHeaderFile("$rootDir/licenseheader.txt", 'package ')
+        }
+        format 'licenseTaskflowJava', {
+            target 'src/**/cn/taskflow/conductor/**/*.java'
+            licenseHeaderFile("$rootDir/taskflow-licenseheader.txt", 'package ')
+        }
+    }
+}
+
+configure(project(':conductor-taskflow')) {
     apply plugin: 'com.diffplug.spotless'
 
     spotless {
@@ -226,7 +248,7 @@ configure(allprojects - project(':conductor-grpc')) {
             googleJavaFormat().aosp()
             removeUnusedImports()
             importOrder('java', 'javax', 'org', 'com.netflix', '', '\\#com.netflix', '\\#')
-            licenseHeaderFile("$rootDir/licenseheader.txt")
+            licenseHeaderFile("$rootDir/taskflow-licenseheader.txt")
         }
     }
 }

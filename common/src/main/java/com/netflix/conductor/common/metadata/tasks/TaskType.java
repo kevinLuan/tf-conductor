@@ -54,7 +54,9 @@ public enum TaskType {
     PULL_WORKFLOW_MESSAGES,
     AGENT,
     GET_AGENT_CARD,
-    CANCEL_AGENT;
+    CANCEL_AGENT,
+    // FOR 加在枚举末尾，避免打乱已有 ProtoEnum 序号
+    FOR;
 
     /**
      * TaskType constants representing each of the possible enumeration values. Motivation: to not
@@ -66,6 +68,8 @@ public enum TaskType {
     public static final String TASK_TYPE_DYNAMIC = "DYNAMIC";
     public static final String TASK_TYPE_JOIN = "JOIN";
     public static final String TASK_TYPE_DO_WHILE = "DO_WHILE";
+
+    public static final String TASK_TYPE_FOR = "FOR";
     public static final String TASK_TYPE_FORK_JOIN_DYNAMIC = "FORK_JOIN_DYNAMIC";
     public static final String TASK_TYPE_EVENT = "EVENT";
     public static final String TASK_TYPE_WAIT = "WAIT";
@@ -99,6 +103,7 @@ public enum TaskType {
         BUILT_IN_TASKS.add(TASK_TYPE_JOIN);
         BUILT_IN_TASKS.add(TASK_TYPE_EXCLUSIVE_JOIN);
         BUILT_IN_TASKS.add(TASK_TYPE_DO_WHILE);
+        BUILT_IN_TASKS.add(TASK_TYPE_FOR);
     }
 
     /**
@@ -121,5 +126,10 @@ public enum TaskType {
 
     public static boolean isBuiltIn(String taskType) {
         return BUILT_IN_TASKS.contains(taskType);
+    }
+
+    /** 是否为循环头（DO_WHILE 或 FOR）。图遍历、Decider、重试共用此判断。 */
+    public static boolean isLoopTask(String taskType) {
+        return TASK_TYPE_DO_WHILE.equals(taskType) || TASK_TYPE_FOR.equals(taskType);
     }
 }

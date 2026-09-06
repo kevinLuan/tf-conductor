@@ -14,6 +14,7 @@ package com.netflix.conductor.rest.controllers;
 
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,10 @@ import static com.netflix.conductor.rest.config.RequestMappingConstants.ENVIRONM
 
 @RestController
 @RequestMapping(value = ENVIRONMENT, produces = MediaType.APPLICATION_JSON_VALUE)
+@ConditionalOnProperty(
+        name = "conductor.environment.type",
+        havingValue = "env",
+        matchIfMissing = true)
 public class EnvironmentResource {
 
     private final EnvironmentDAO environmentDAO;

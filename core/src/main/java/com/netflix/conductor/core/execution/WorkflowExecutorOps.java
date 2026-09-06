@@ -390,7 +390,7 @@ public class WorkflowExecutorOps implements WorkflowExecutor {
                     }
                 } else if (task.getStatus() == CANCELED) {
                     if (task.getTaskType().equalsIgnoreCase(TaskType.JOIN.toString())
-                            || task.getTaskType().equalsIgnoreCase(TaskType.DO_WHILE.toString())) {
+                            || TaskType.isLoopTask(task.getTaskType())) {
                         task.setStatus(IN_PROGRESS);
                         executionDAOFacade.updateTask(task);
                     } else {
@@ -475,7 +475,7 @@ public class WorkflowExecutorOps implements WorkflowExecutor {
                     break;
                 case CANCELED:
                     if (task.getTaskType().equalsIgnoreCase(TaskType.JOIN.toString())
-                            || task.getTaskType().equalsIgnoreCase(TaskType.DO_WHILE.toString())) {
+                            || TaskType.isLoopTask(task.getTaskType())) {
                         task.setStatus(IN_PROGRESS);
                         addTaskToQueue(task);
                         // Task doesn't have to be updated yet. Will be updated along with other
@@ -550,7 +550,7 @@ public class WorkflowExecutorOps implements WorkflowExecutor {
                     .orElse(parentWorkflow);
         }
 
-        if (TaskType.TASK_TYPE_DO_WHILE.equals(task.getTaskType())) {
+        if (TaskType.isLoopTask(task.getTaskType())) {
             return parentWorkflow.getTasks().stream()
                     .filter(t -> TaskType.TASK_TYPE_SUB_WORKFLOW.equals(t.getTaskType()))
                     .filter(UNSUCCESSFUL_TERMINAL_TASK)
@@ -576,7 +576,7 @@ public class WorkflowExecutorOps implements WorkflowExecutor {
         // IN_PROGRESS because the async executor evaluates a JOIN only via execute() (called
         // for IN_PROGRESS tasks), so a fresh SCHEDULED copy is popped, never evaluated, and
         // postponed forever, leaving the workflow RUNNING after every branch completes.
-        if (task.getTaskType().equalsIgnoreCase(TaskType.DO_WHILE.name())
+        if (TaskType.isLoopTask(task.getTaskType())
                 || task.getTaskType().equalsIgnoreCase(TaskType.FORK_JOIN.name())
                 || task.getTaskType().equalsIgnoreCase(TaskType.JOIN.name())
                 || task.getTaskType().equalsIgnoreCase(TaskType.EXCLUSIVE_JOIN.name())) {
@@ -2044,6 +2044,19 @@ public class WorkflowExecutorOps implements WorkflowExecutor {
                                         task.getTaskDefName());
                         throw new NonTransientException(errorMsg, e);
                     }
+                    // Taskflow：HUMAN 是同步系统任务，不会进入 addTaskToQueue，
+                    // 因此默认不会触发 TaskStatusListener。补发 IN_PROGRESS 供审批单等扩展订阅。
+                    if (TaskType.TASK_TYPE_HUMAN.equals(task.getTaskType())) {
+                        try {
+                            taskStatusListener.onTaskInProgressIfEnabled(task);
+                        } catch (Exception e) {
+                            LOGGER.error(
+                                    "Error notifying TaskStatusListener for HUMAN task {} in workflow {}",
+                                    task.getTaskId(),
+                                    workflow.getWorkflowId(),
+                                    e);
+                        }
+                    }
                     startedSystemTasks = true;
                     executionDAOFacade.updateTask(task);
                 } else {
@@ -2453,9 +2466,7 @@ public class WorkflowExecutorOps implements WorkflowExecutor {
                                     task.getOutputData().remove("subWorkflowId");
                                 }
                                 if (TaskType.JOIN.toString().equalsIgnoreCase(task.getTaskType())
-                                        || TaskType.DO_WHILE
-                                                .toString()
-                                                .equalsIgnoreCase(task.getTaskType())) {
+                                        || TaskType.isLoopTask(task.getTaskType())) {
                                     task.setStatus(IN_PROGRESS);
                                 } else if (systemTaskRegistry.isSystemTask(task.getTaskType())
                                         && systemTaskRegistry.get(task.getTaskType()) != null

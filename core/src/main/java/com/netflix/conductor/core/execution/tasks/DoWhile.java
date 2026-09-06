@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.netflix.conductor.annotations.VisibleForTesting;
@@ -41,8 +42,17 @@ public class DoWhile extends WorkflowSystemTask {
     private final ParametersUtils parametersUtils;
     private final ExecutionDAOFacade executionDAOFacade;
 
+    @Autowired
     public DoWhile(ParametersUtils parametersUtils, ExecutionDAOFacade executionDAOFacade) {
-        super(TASK_TYPE_DO_WHILE);
+        this(TASK_TYPE_DO_WHILE, parametersUtils, executionDAOFacade);
+    }
+
+    /** 供 FOR 等循环壳复用调度实现，仅替换系统任务类型。 */
+    protected DoWhile(
+            String taskType,
+            ParametersUtils parametersUtils,
+            ExecutionDAOFacade executionDAOFacade) {
+        super(taskType);
         this.parametersUtils = parametersUtils;
         this.executionDAOFacade = executionDAOFacade;
     }
@@ -434,17 +444,20 @@ public class DoWhile extends WorkflowSystemTask {
             return true;
         }
 
-        // Check Orkes compatibility: _items in inputParameters
+        // inputParameters.items（画布 FOR）或 _items（Orkes）
         Map<String, Object> inputParams = task.getWorkflowTask().getInputParameters();
-        if (inputParams != null && inputParams.containsKey("_items")) {
-            Object itemsValue = inputParams.get("_items");
-            return itemsValue != null
-                    && (itemsValue instanceof String && !((String) itemsValue).trim().isEmpty()
-                            || itemsValue instanceof Collection
-                            || itemsValue instanceof Object[]);
-        }
+        return isItemsParam(inputParams, "items") || isItemsParam(inputParams, "_items");
+    }
 
-        return false;
+    private static boolean isItemsParam(Map<String, Object> inputParams, String key) {
+        if (inputParams == null || !inputParams.containsKey(key)) {
+            return false;
+        }
+        Object itemsValue = inputParams.get(key);
+        return itemsValue != null
+                && (itemsValue instanceof String && !((String) itemsValue).trim().isEmpty()
+                        || itemsValue instanceof Collection
+                        || itemsValue instanceof Object[]);
     }
 
     /**
@@ -485,7 +498,9 @@ public class DoWhile extends WorkflowSystemTask {
                             task.getTaskId(),
                             taskDefinition);
 
-            if (evaluatedInputParams.containsKey("_items")) {
+            if (evaluatedInputParams.containsKey("items")) {
+                itemsValue = evaluatedInputParams.get("items");
+            } else if (evaluatedInputParams.containsKey("_items")) {
                 itemsValue = evaluatedInputParams.get("_items");
             }
         }

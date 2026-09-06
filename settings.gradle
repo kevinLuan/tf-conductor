@@ -21,6 +21,8 @@ include 'annotations-processor'
 include 'server'
 include 'common'
 include 'core'
+// Taskflow 扩展模块：提供 AIEvaluator / IfElseEvaluator，由 server 引入后供 core 运行时使用
+include 'taskflow'
 
 include 'cassandra-persistence'
 include 'redis-configuration'

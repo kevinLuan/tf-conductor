@@ -15,6 +15,7 @@ package com.netflix.conductor.core.execution.mapper;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import com.netflix.conductor.common.metadata.tasks.TaskType;
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef;
 import com.netflix.conductor.common.metadata.workflow.WorkflowTask;
 import com.netflix.conductor.core.exception.TerminateWorkflowException;
+import com.netflix.conductor.core.execution.evaluators.AdvancedEvaluator;
 import com.netflix.conductor.core.execution.evaluators.Evaluator;
 import com.netflix.conductor.model.TaskModel;
 import com.netflix.conductor.model.WorkflowModel;
@@ -87,7 +89,20 @@ public class SwitchTaskMapper implements TaskMapper {
 
         String evalResult = "";
         try {
-            evalResult = "" + evaluator.evaluate(workflowTask.getExpression(), taskInput);
+            // Taskflow 扩展：若评估器实现了 AdvancedEvaluator，则传入工作流上下文，
+            // 以支持 if-else / ai 等需要 WorkflowModel 的评估器；否则走原有无上下文评估。
+            if (evaluator instanceof AdvancedEvaluator advancedEvaluator) {
+                Optional<Object> evaluated =
+                        advancedEvaluator.evaluate(
+                                workflowModel,
+                                workflowTask,
+                                taskMapperContext.getTaskId(),
+                                workflowTask.getExpression(),
+                                taskInput);
+                evalResult = evaluated.map(Object::toString).orElse("");
+            } else {
+                evalResult = "" + evaluator.evaluate(workflowTask.getExpression(), taskInput);
+            }
         } catch (Exception exception) {
             TaskModel switchTask = taskMapperContext.createTaskModel();
             switchTask.setTaskType(TaskType.TASK_TYPE_SWITCH);

@@ -17,6 +17,9 @@ plugins {
 
 dependencies {
     implementation project(':conductor-core')
+    // Taskflow 扩展评估器（ai / if-else）。因评估器需实现 core 的 Evaluator，
+    // 新模块只能依赖 core，不能由 core 反向依赖（Gradle 循环依赖），故在此引入。
+    implementation project(':conductor-taskflow')
     implementation project(':conductor-rest')
     implementation project(':conductor-grpc-server')
     implementation project(':conductor-ai')

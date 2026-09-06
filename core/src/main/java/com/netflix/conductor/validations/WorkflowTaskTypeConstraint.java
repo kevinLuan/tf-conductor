@@ -105,6 +105,9 @@ public @interface WorkflowTaskTypeConstraint {
                 case TaskType.TASK_TYPE_DO_WHILE:
                     valid = isDoWhileTaskValid(workflowTask, context);
                     break;
+                case TaskType.TASK_TYPE_FOR:
+                    valid = isForTaskValid(workflowTask, context);
+                    break;
                 case TaskType.TASK_TYPE_SUB_WORKFLOW:
                     valid = isSubWorkflowTaskValid(workflowTask, context);
                     break;
@@ -276,6 +279,37 @@ public @interface WorkflowTaskTypeConstraint {
                                 PARAM_REQUIRED_STRING_FORMAT,
                                 "loopOver",
                                 TaskType.DO_WHILE,
+                                workflowTask.getName());
+                context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+                valid = false;
+            }
+            return valid;
+        }
+
+        private boolean isForTaskValid(
+                WorkflowTask workflowTask, ConstraintValidatorContext context) {
+            boolean valid = true;
+            boolean hasItemsField =
+                    workflowTask.getItems() != null && !workflowTask.getItems().isBlank();
+            boolean hasItemsInput =
+                    workflowTask.getInputParameters() != null
+                            && workflowTask.getInputParameters().containsKey("items");
+            if (!hasItemsField && !hasItemsInput) {
+                String message =
+                        String.format(
+                                PARAM_REQUIRED_STRING_FORMAT,
+                                "items",
+                                TaskType.FOR,
+                                workflowTask.getName());
+                context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+                valid = false;
+            }
+            if (workflowTask.getLoopOver() == null || workflowTask.getLoopOver().isEmpty()) {
+                String message =
+                        String.format(
+                                PARAM_REQUIRED_STRING_FORMAT,
+                                "loopOver",
+                                TaskType.FOR,
                                 workflowTask.getName());
                 context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
                 valid = false;
