@@ -19,33 +19,21 @@ package cn.taskflow.conductor.core.env;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 环境变量存储。与隐私配置分表，memory / jdbc 都走这套。
- */
+/** 环境变量存储。与隐私配置分表，memory / jdbc 都走这套。 */
 public interface EnvironmentStore {
 
-    /**
-     * 按名称读取一条环境变量。
-     */
+    /** 按名称读取一条环境变量。 */
     Optional<EnvironmentRecord> get(String name);
 
-    /**
-     * 列出全部环境变量。
-     */
+    /** 列出全部环境变量。 */
     List<EnvironmentRecord> list();
 
-    /**
-     * 按名称写入值；已存在则覆盖，tags 保持不变。
-     */
+    /** 按名称写入值；已存在则覆盖，tags 保持不变。 */
     void put(String name, String value);
 
-    /**
-     * 按名称删除；不存在则视为成功。
-     */
+    /** 按名称删除；不存在则视为成功。 */
     void delete(String name);
 
-    /**
-     * 只改 tags，不改 value。行不存在则 no-op。
-     */
+    /** 只改 tags，不改 value。行不存在则 no-op。 */
     void setTagsJson(String name, String tagsJson);
 }

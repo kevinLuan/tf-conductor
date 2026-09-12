@@ -28,13 +28,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * Orkes / SchemaClient 兼容的 schema 登记。
- */
+/** Orkes / SchemaClient 兼容的 schema 登记。 */
 public class SchemaRegistry {
 
-    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
-    };
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {};
 
     private final SchemaStore store;
     private final ObjectMapper mapper;
@@ -73,9 +70,7 @@ public class SchemaRegistry {
                         schemaDef.getUpdatedBy()));
     }
 
-    /**
-     * 返回该 name 的最高版本；没有则 404。
-     */
+    /** 返回该 name 的最高版本；没有则 404。 */
     public SchemaDef getLatest(String name) {
         requireName(name);
         int version = store.maxVersion(name);
@@ -85,9 +80,7 @@ public class SchemaRegistry {
         return get(name, version);
     }
 
-    /**
-     * 读取指定版本；没有则 404。
-     */
+    /** 读取指定版本；没有则 404。 */
     public SchemaDef get(String name, int version) {
         requireName(name);
         return store.get(name, version)
@@ -95,16 +88,12 @@ public class SchemaRegistry {
                 .orElseThrow(() -> new NotFoundException("Schema not found: %s/%s", name, version));
     }
 
-    /**
-     * {@code shortFormat=true} 时只留 name / version / 时间，不带 data。
-     */
+    /** {@code shortFormat=true} 时只留 name / version / 时间，不带 data。 */
     public List<SchemaDef> list(boolean shortFormat) {
         return store.listAll().stream().map(row -> toDef(row, shortFormat)).toList();
     }
 
-    /**
-     * 删除该 name 全部版本；不存在则 404。
-     */
+    /** 删除该 name 全部版本；不存在则 404。 */
     public void deleteAll(String name) {
         requireName(name);
         if (store.maxVersion(name) < 1) {
@@ -113,9 +102,7 @@ public class SchemaRegistry {
         store.deleteAll(name);
     }
 
-    /**
-     * 删除指定版本；不存在则 404。
-     */
+    /** 删除指定版本；不存在则 404。 */
     public void delete(String name, int version) {
         requireName(name);
         if (store.get(name, version).isEmpty()) {
@@ -124,9 +111,7 @@ public class SchemaRegistry {
         store.delete(name, version);
     }
 
-    /**
-     * 行记录转 {@link SchemaDef}；短格式省略 payload。
-     */
+    /** 行记录转 {@link SchemaDef}；短格式省略 payload。 */
     private SchemaDef toDef(SchemaRecord row, boolean shortFormat) {
         SchemaDef def = new SchemaDef();
         def.setName(row.name());

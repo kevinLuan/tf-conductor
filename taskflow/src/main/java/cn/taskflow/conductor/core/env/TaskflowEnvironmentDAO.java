@@ -34,13 +34,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * 可写 EnvironmentDAO，合同对齐 Orkes EnvironmentClient：key + text/plain value，以及 tags。
- */
+/** 可写 EnvironmentDAO，合同对齐 Orkes EnvironmentClient：key + text/plain value，以及 tags。 */
 public class TaskflowEnvironmentDAO implements EnvironmentDAO {
 
-    private static final TypeReference<List<Tag>> TAGS_TYPE = new TypeReference<>() {
-    };
+    private static final TypeReference<List<Tag>> TAGS_TYPE = new TypeReference<>() {};
 
     private final EnvironmentStore store;
     private final boolean envFallback;
@@ -59,9 +56,7 @@ public class TaskflowEnvironmentDAO implements EnvironmentDAO {
         this.mapper = mapper;
     }
 
-    /**
-     * 先读 store，未命中且开启回落时再读 {@code CONDUCTOR_ENV_*}。
-     */
+    /** 先读 store，未命中且开启回落时再读 {@code CONDUCTOR_ENV_*}。 */
     @Override
     public String getEnvVariable(String key) {
         requireKey(key);
@@ -70,9 +65,7 @@ public class TaskflowEnvironmentDAO implements EnvironmentDAO {
                 .orElseGet(() -> envFallback ? EnvVarLookup.lookup(envPrefix, key) : null);
     }
 
-    /**
-     * 只写入 store；value 不可为 null。
-     */
+    /** 只写入 store；value 不可为 null。 */
     @Override
     public void setEnvVariable(String key, String value) {
         requireKey(key);
@@ -82,27 +75,21 @@ public class TaskflowEnvironmentDAO implements EnvironmentDAO {
         store.put(key.trim(), value);
     }
 
-    /**
-     * 只删 store 中的记录。
-     */
+    /** 只删 store 中的记录。 */
     @Override
     public void delete(String key) {
         requireKey(key);
         store.delete(key);
     }
 
-    /**
-     * DELETE /environment/{key}：先取旧值再删，与 SDK 返回值对齐。
-     */
+    /** DELETE /environment/{key}：先取旧值再删，与 SDK 返回值对齐。 */
     public String deleteAndReturn(String key) {
         String previous = getEnvVariable(key);
         delete(key);
         return previous == null ? "" : previous;
     }
 
-    /**
-     * OSS {@link EnvironmentDAO} 合同：仅 name / value，不含 tags。
-     */
+    /** OSS {@link EnvironmentDAO} 合同：仅 name / value，不含 tags。 */
     @Override
     public List<EnvironmentVariable> getAll() {
         return listAll().stream()
@@ -110,9 +97,7 @@ public class TaskflowEnvironmentDAO implements EnvironmentDAO {
                 .toList();
     }
 
-    /**
-     * GET /environment：name / value / tags。
-     */
+    /** GET /environment：name / value / tags。 */
     public List<EnvironmentVariableView> listAll() {
         Map<String, EnvironmentVariableView> byName = new LinkedHashMap<>();
         for (EnvironmentRecord record : store.list()) {
@@ -132,17 +117,13 @@ public class TaskflowEnvironmentDAO implements EnvironmentDAO {
         return new ArrayList<>(byName.values());
     }
 
-    /**
-     * 读取指定变量的 tags；变量不存在时返回空列表。
-     */
+    /** 读取指定变量的 tags；变量不存在时返回空列表。 */
     public List<Tag> getTags(String name) {
         requireKey(name);
         return store.get(name).map(record -> readTags(record.tagsJson())).orElse(List.of());
     }
 
-    /**
-     * 整表替换 tags；变量不存在则 404。
-     */
+    /** 整表替换 tags；变量不存在则 404。 */
     public void setTags(String name, List<Tag> tags) {
         requireKey(name);
         if (tags == null) {
@@ -154,9 +135,7 @@ public class TaskflowEnvironmentDAO implements EnvironmentDAO {
         store.setTagsJson(name, writeTags(tags));
     }
 
-    /**
-     * 从现有 tags 中移除给定项后写回。
-     */
+    /** 从现有 tags 中移除给定项后写回。 */
     public void deleteTags(String name, List<Tag> tags) {
         requireKey(name);
         if (tags == null) {
@@ -169,9 +148,7 @@ public class TaskflowEnvironmentDAO implements EnvironmentDAO {
         }
     }
 
-    /**
-     * 解析 store 里的 tags JSON；坏数据当作空列表。
-     */
+    /** 解析 store 里的 tags JSON；坏数据当作空列表。 */
     private List<Tag> readTags(String tagsJson) {
         if (StringUtils.isBlank(tagsJson)) {
             return new ArrayList<>();
@@ -184,9 +161,7 @@ public class TaskflowEnvironmentDAO implements EnvironmentDAO {
         }
     }
 
-    /**
-     * 把 tags 序列化进 store。
-     */
+    /** 把 tags 序列化进 store。 */
     private String writeTags(List<Tag> tags) {
         try {
             return mapper.writeValueAsString(tags);
@@ -195,9 +170,7 @@ public class TaskflowEnvironmentDAO implements EnvironmentDAO {
         }
     }
 
-    /**
-     * key 不能为 null 或空白。
-     */
+    /** key 不能为 null 或空白。 */
     private static void requireKey(String key) {
         if (key == null) {
             throw new NullPointerException("key cannot be null");

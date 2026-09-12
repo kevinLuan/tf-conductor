@@ -62,9 +62,7 @@ public class AIFactory {
         this.prompt = loadContent(resourceLoader, "classify.txt");
     }
 
-    /**
-     * 从 classpath {@code ai/prompt/} 读取分类提示词模板。
-     */
+    /** 从 classpath {@code ai/prompt/} 读取分类提示词模板。 */
     private String loadContent(ResourceLoader resourceLoader, String resourceName)
             throws IOException {
         Resource resource = resourceLoader.getResource("classpath:/ai/prompt/" + resourceName);
@@ -76,8 +74,8 @@ public class AIFactory {
      * 用 LLM 在 SWITCH cases 中做语义分类。
      *
      * @param params 分类指令
-     * @param input  任务输入
-     * @param cases  decisionCases 的 key 集合
+     * @param input 任务输入
+     * @param cases decisionCases 的 key 集合
      * @return 命中的 case 名称；未命中为空
      */
     public Optional<String> classify(SwitchAiParams params, Object input, Set<String> cases)
@@ -102,9 +100,7 @@ public class AIFactory {
         }
     }
 
-    /**
-     * 把 decisionCases key 编成从 1 起的 id，供模型返回数字编号。
-     */
+    /** 把 decisionCases key 编成从 1 起的 id，供模型返回数字编号。 */
     private List<CaseInfo> convertCases(Set<String> cases) {
         List<CaseInfo> list = new ArrayList<>();
         AtomicInteger cnt = new AtomicInteger(0);
@@ -118,9 +114,7 @@ public class AIFactory {
         private final String description;
     }
 
-    /**
-     * 用分类模板填充指令、输入和候选分支，并清洗用户文本。
-     */
+    /** 用分类模板填充指令、输入和候选分支，并清洗用户文本。 */
     public String generatePrompt(String instructions, Object inputMap, List<CaseInfo> cases)
             throws JsonProcessingException {
         instructions = sanitizeInput(instructions);
@@ -131,9 +125,7 @@ public class AIFactory {
                 .replace("{{switch_cases}}", sanitizeInput(switchCases));
     }
 
-    /**
-     * 清洗用户输入，移除或转义特殊字符，避免干扰 AI 判断。
-     */
+    /** 清洗用户输入，移除或转义特殊字符，避免干扰 AI 判断。 */
     private String sanitizeInput(String input) {
         if (input == null || input.isEmpty()) {
             return "";

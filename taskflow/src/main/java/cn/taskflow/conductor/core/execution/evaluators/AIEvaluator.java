@@ -54,18 +54,14 @@ public class AIEvaluator implements AdvancedEvaluator {
         this.aiFactory = aiFactory;
     }
 
-    /**
-     * 无工作流上下文时不可用。
-     */
+    /** 无工作流上下文时不可用。 */
     @Override
     public Object evaluate(String expression, Object input) {
         throw new UnsupportedOperationException(
                 "AIEvaluator 需要工作流上下文，请使用带 WorkflowModel 的 evaluate 方法");
     }
 
-    /**
-     * 将 SWITCH expression 解析为 AI 分类参数。
-     */
+    /** 将 SWITCH expression 解析为 AI 分类参数。 */
     private SwitchAiParams parseParameter(String expression) {
         try {
             return objectMapper.readValue(expression, SwitchAiParams.class);
@@ -74,9 +70,7 @@ public class AIEvaluator implements AdvancedEvaluator {
         }
     }
 
-    /**
-     * 按指令与任务输入，从 decisionCases 里选出语义最接近的分支名。
-     */
+    /** 按指令与任务输入，从 decisionCases 里选出语义最接近的分支名。 */
     @Override
     public Optional<Object> evaluate(
             WorkflowModel workflow,

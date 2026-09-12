@@ -34,9 +34,7 @@ import com.netflix.conductor.dao.MetadataDAO;
 import com.netflix.conductor.model.TaskModel;
 import com.netflix.conductor.model.WorkflowModel;
 
-/**
- * 将 {@code type=FOR} 映射为进行中的循环头。第一轮循环体仍由 {@code For.execute()} 调度。
- */
+/** 将 {@code type=FOR} 映射为进行中的循环头。第一轮循环体仍由 {@code For.execute()} 调度。 */
 @Component
 public class ForTaskMapper implements TaskMapper {
 
@@ -55,9 +53,7 @@ public class ForTaskMapper implements TaskMapper {
         return TaskType.FOR.name();
     }
 
-    /**
-     * 只产出进行中的 FOR 循环头。已终结的同名任务不再映射，避免重复调度。
-     */
+    /** 只产出进行中的 FOR 循环头。已终结的同名任务不再映射，避免重复调度。 */
     @Override
     public List<TaskModel> getMappedTasks(TaskMapperContext taskMapperContext) {
         LOGGER.debug("TaskMapperContext {} in ForTaskMapper", taskMapperContext);

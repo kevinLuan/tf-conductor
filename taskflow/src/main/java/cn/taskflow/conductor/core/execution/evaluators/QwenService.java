@@ -54,9 +54,7 @@ public class QwenService implements LLMService {
         this.model = model;
     }
 
-    /**
-     * 调用通义千问，把整段提示词作为 system 消息发出。
-     */
+    /** 调用通义千问，把整段提示词作为 system 消息发出。 */
     @Override
     public String query(String query) throws AICallerException {
         if (StringUtils.isBlank(apiKey)) {

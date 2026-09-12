@@ -60,31 +60,24 @@ public class IfElseEvaluator implements AdvancedEvaluator {
         this.parametersUtils = parametersUtils;
     }
 
-    /**
-     * 无工作流上下文时不可用，避免走错评估入口。
-     */
+    /** 无工作流上下文时不可用，避免走错评估入口。 */
     @Override
     public Object evaluate(String expression, Object input) {
         throw new UnsupportedOperationException(
                 "IfElseEvaluator 需要工作流上下文，请使用带 WorkflowModel 的 evaluate 方法");
     }
 
-    /**
-     * 将 SWITCH expression 解析为条件分支列表。
-     */
+    /** 将 SWITCH expression 解析为条件分支列表。 */
     private List<ConditionRouter> parseRouters(String expression) {
         try {
             return objectMapper.readValue(
-                    expression, new TypeReference<List<ConditionRouter>>() {
-                    });
+                    expression, new TypeReference<List<ConditionRouter>>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException("解析 if-else 条件失败: " + expression, e);
         }
     }
 
-    /**
-     * 先用 {@link ParametersUtils} 解析左右值占位符，再按分支顺序求值，返回第一个命中的 action（decisionCases key）。
-     */
+    /** 先用 {@link ParametersUtils} 解析左右值占位符，再按分支顺序求值，返回第一个命中的 action（decisionCases key）。 */
     @Override
     public Optional<Object> evaluate(
             WorkflowModel workflow,
@@ -121,9 +114,7 @@ public class IfElseEvaluator implements AdvancedEvaluator {
         return Optional.empty();
     }
 
-    /**
-     * 把各谓词的左右表达式摊平到 Map，供 ParametersUtils 一次性替换占位符。
-     */
+    /** 把各谓词的左右表达式摊平到 Map，供 ParametersUtils 一次性替换占位符。 */
     private Map<String, Object> getStringObjectMap(List<ConditionRouter> conditionRouters) {
         Map<String, Object> exprMap = new HashMap<>();
         for (int i = 0; i < conditionRouters.size(); i++) {
@@ -140,9 +131,7 @@ public class IfElseEvaluator implements AdvancedEvaluator {
         return exprMap;
     }
 
-    /**
-     * 分支 i、谓词 j 在摊平 Map 中的键前缀。
-     */
+    /** 分支 i、谓词 j 在摊平 Map 中的键前缀。 */
     private String getKey(int i, int j) {
         return "i_" + i + "__j_" + j;
     }
@@ -154,9 +143,7 @@ public class IfElseEvaluator implements AdvancedEvaluator {
         return String.valueOf(value);
     }
 
-    /**
-     * 按 AND/OR 验证是否匹配该条件分支。
-     */
+    /** 按 AND/OR 验证是否匹配该条件分支。 */
     private boolean isMatches(ConditionRouter.ConditionGroup conditionGroup) {
         if (conditionGroup.getOperator().isOr()) {
             for (ConditionRouter.ConditionPredicate child : conditionGroup.getChildren()) {
@@ -174,9 +161,7 @@ public class IfElseEvaluator implements AdvancedEvaluator {
         return true;
     }
 
-    /**
-     * 对单个谓词按运算符比较已解析后的左右值。
-     */
+    /** 对单个谓词按运算符比较已解析后的左右值。 */
     private boolean evaluateCondition(ConditionRouter.ConditionPredicate node) {
         String expression = node.getExpression();
         String value = node.getValue();
@@ -214,9 +199,7 @@ public class IfElseEvaluator implements AdvancedEvaluator {
         }
     }
 
-    /**
-     * 判断左侧字符串是否包含右侧值（对应 EXISTS）。
-     */
+    /** 判断左侧字符串是否包含右侧值（对应 EXISTS）。 */
     private boolean include(String expression, String value) {
         if (StringUtils.isEmpty(value)) {
             return false;
@@ -224,9 +207,7 @@ public class IfElseEvaluator implements AdvancedEvaluator {
         return expression.contains(value);
     }
 
-    /**
-     * 按 double 比较大小，用于 &gt; / &gt;= / &lt; / &lt;=。
-     */
+    /** 按 double 比较大小，用于 &gt; / &gt;= / &lt; / &lt;=。 */
     private int compareNumbers(String expression, String value) {
         double exprNum = Double.parseDouble(expression.trim());
         double valueNum = Double.parseDouble(value.trim());

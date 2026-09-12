@@ -26,8 +26,7 @@ import java.util.Map;
  */
 public final class TemplateProcessor {
 
-    private TemplateProcessor() {
-    }
+    private TemplateProcessor() {}
 
     /**
      * 处理模版。
@@ -38,7 +37,7 @@ public final class TemplateProcessor {
      * </pre>
      *
      * @param template 模版文本
-     * @param input    运行时输入
+     * @param input 运行时输入
      */
     public static String processTemplate(String template, Map<String, Object> input) {
         if (template == null || input == null) {
@@ -61,9 +60,7 @@ public final class TemplateProcessor {
         return result.toString();
     }
 
-    /**
-     * 按点号路径从嵌套 Map 取值，中途不是 Map 则视为未命中。
-     */
+    /** 按点号路径从嵌套 Map 取值，中途不是 Map 则视为未命中。 */
     private static String getValueFromMap(String key, Map<String, Object> input) {
         String[] parts = key.split("\\.");
         Object current = input;
