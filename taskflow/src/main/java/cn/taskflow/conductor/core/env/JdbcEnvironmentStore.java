@@ -33,8 +33,8 @@ public final class JdbcEnvironmentStore implements EnvironmentStore {
               name VARCHAR(100) NOT NULL PRIMARY KEY,
               value TEXT NOT NULL,
               tags TEXT,
-              created_at INTEGER NOT NULL,
-              updated_at INTEGER NOT NULL
+              created_at BIGINT NOT NULL,
+              updated_at BIGINT NOT NULL
             )
             """;
 

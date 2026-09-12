@@ -35,8 +35,8 @@ public final class JdbcSchemaStore implements SchemaStore {
               type VARCHAR(50) NOT NULL,
               data TEXT,
               external_ref TEXT,
-              created_at INTEGER NOT NULL,
-              updated_at INTEGER NOT NULL,
+              created_at BIGINT NOT NULL,
+              updated_at BIGINT NOT NULL,
               created_by VARCHAR(50),
               updated_by VARCHAR(50),
               PRIMARY KEY (name, version)
